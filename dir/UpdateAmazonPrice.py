@@ -17,8 +17,8 @@ def create_email_message(from_address, to_address, subject, body):
 def amazonPriceUpdate():
     # Gmail sender details
     # To do
-    email_address = ""
-    email_password = ""
+    email_address = "mars@marstanjx.com"
+    email_password = "cFW4Ew9fg5iL"
 
     # Recipent
     to_address = (
@@ -62,7 +62,7 @@ def amazonPriceUpdate():
                 body= "Reading Error with url: " + key,
             )
         
-            with smtplib.SMTP('smtp.gmail.com', port=587) as smtp_server:
+            with smtplib.SMTP('smtp.ipage.com', port=587) as smtp_server:
                 smtp_server.ehlo()
                 smtp_server.starttls()
                 smtp_server.login(email_address, email_password)
@@ -80,7 +80,7 @@ def amazonPriceUpdate():
                     body= "Your product " + title + " price changed from $" + str(data[key]) + " to " + price + ".",
                 )
         
-                with smtplib.SMTP('smtp.gmail.com', port=587) as smtp_server:
+                with smtplib.SMTP('smtp.ipage.com', port=587) as smtp_server:
                     smtp_server.ehlo()
                     smtp_server.starttls()
                     smtp_server.login(email_address, email_password)
