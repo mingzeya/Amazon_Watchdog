@@ -5,6 +5,10 @@ import time
 from email.headerregistry import Address
 from email.message import EmailMessage
 import smtplib
+import datetime
+
+def log(name, msg):
+	print("[" + datetime.datetime.now().strftime("%Y/%m/%d, %I:%M%p") + "] \n\t" + name  + "\n" + msg + "\n\n")
 
 def create_email_message(from_address, to_address, subject, body):
     msg = EmailMessage()
@@ -19,6 +23,7 @@ def amazonPriceUpdate():
     # To do
     email_address = "mars@marstanjx.com"
     email_password = "cFW4Ew9fg5iL"
+    mail_server = "smtp.ipage.com"
 
     # Recipent
     to_address = (
@@ -39,7 +44,7 @@ def amazonPriceUpdate():
         try:
             page = requests.get(url,headers=headers)
         except:
-            print("Possible internet error!")
+            log("", "Possible internet error!")
             return False
 
         html_contents = page.text
@@ -51,27 +56,16 @@ def amazonPriceUpdate():
         d = pq(html_contents)
 
         price = d('#priceblock_ourprice').html()
-        title = d('#productTitle').html().strip()
+        title = d('#productTitle').html()
         
         if(price == None or title == None):
+            log("", "Reading Error!")
             interrupted = True
-            msg = create_email_message(
-                from_address=email_address,
-                to_address=to_address,
-                subject='Amazon Read Error',
-                body= "Reading Error with url: " + key,
-            )
-        
-            with smtplib.SMTP('smtp.ipage.com', port=587) as smtp_server:
-                smtp_server.ehlo()
-                smtp_server.starttls()
-                smtp_server.login(email_address, email_password)
-                smtp_server.send_message(msg)
-            
-            print("Reading Error!")
 
         else:
+            title =  title.strip()
             if (float(price[1:]) != data[key]):
+                log(title, "Price Change Detected!")
                 changed = True
                 msg = create_email_message(
                     from_address=email_address,
@@ -80,15 +74,15 @@ def amazonPriceUpdate():
                     body= "Your product " + title + " price changed from $" + str(data[key]) + " to " + price + ".",
                 )
         
-                with smtplib.SMTP('smtp.ipage.com', port=587) as smtp_server:
+                with smtplib.SMTP(mail_server, port=587) as smtp_server:
                     smtp_server.ehlo()
                     smtp_server.starttls()
                     smtp_server.login(email_address, email_password)
                     smtp_server.send_message(msg)
                 data[key] = float(price[1:])
-                print("Price Change!")
+                log(title, "Email Sent!")
             else:
-                print("Nothing happened!")
+                log(title, "Nothing happened!")
 
     if changed:
         with open("price_list.json",'w') as f:
